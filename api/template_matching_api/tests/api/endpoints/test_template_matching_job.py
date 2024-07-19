@@ -74,6 +74,19 @@ def test_get_template_matching_job(
         )
 
 
+def test_get_template_matching_job_results(
+    with_template_matching_jobs: list[TemplateMatchingJob],
+    client: TestClient,
+    session: Session,
+) -> None:
+    for job in with_template_matching_jobs:
+        job.job_state = JobState.SUCCEEDED
+        session.commit()
+
+        resp = client.get(f"/api/template-matching-job/{job.id}/results")
+        assert resp.status_code == 200
+
+
 def test_rerun_template_matching_job(
     with_template_matching_jobs: list[TemplateMatchingJob], client: TestClient
 ) -> None:

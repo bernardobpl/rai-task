@@ -26,3 +26,18 @@ class TemplateMatchingJobOut(BaseModel):
     job_id: str | None
 
     document_templates: list[DocumentTemplateOut]
+
+
+class SampleResult(BaseModel):
+    sample_id: int
+    score: float
+
+
+class TemplateMatchingJobTempLateResults(BaseModel):
+    template_id: int
+    sample_results: list[SampleResult]
+
+
+class TemplateMatchingJobResults(BaseModel):
+    results_per_template: list[TemplateMatchingJobTempLateResults]
+    total_run_time: int
