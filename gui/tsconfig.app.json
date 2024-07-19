@@ -6,7 +6,8 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "types": [
-      "lodash"
+      "lodash",
+      "file-saver"
     ],
 
     /* Bundler mode */

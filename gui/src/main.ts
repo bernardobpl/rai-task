@@ -4,6 +4,7 @@ import vuetify from '@/plugins/vuetify.ts';
 import router from '@/router';
 import { createApiClient } from '@/api';
 import urlJoin from 'url-join';
+import { createPinia } from 'pinia';
 
 const app = createApp(App);
 
@@ -16,5 +17,8 @@ const apiClient = createApiClient({
 });
 
 app.use(apiClient);
+
+const pinia = createPinia();
+app.use(pinia);
 
 app.mount('#app');

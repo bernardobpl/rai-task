@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 DB_STORAGE_LOCATION = (
@@ -11,9 +11,9 @@ DB_STORAGE_LOCATION = (
 )
 
 
-def get_db():
+def get_db() -> Engine:
     return create_engine(
-        f"sqlite+pysqlite://{DB_STORAGE_LOCATION}",
+        f"sqlite+pysqlite:///{DB_STORAGE_LOCATION}",
         echo=True,
     )
 

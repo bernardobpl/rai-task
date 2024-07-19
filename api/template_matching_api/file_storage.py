@@ -14,7 +14,9 @@ class DocumentTemplateStorage:
         return self.file_location / str(template_id) / self.file_name
 
     def save(self, template_id: int, file_bytes: bytes) -> None:
-        self._get_location_for_template(template_id).write_bytes(file_bytes)
+        template_location=self._get_location_for_template(template_id)
+        os.makedirs(os.path.dirname(template_location), exist_ok=True)
+        template_location.write_bytes(file_bytes)
 
     def load(self, template_id: int) -> bytes:
         return self._get_location_for_template(template_id).read_bytes()
