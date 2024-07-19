@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -12,7 +13,9 @@ class DocumentTemplate(Base):
     template_filename = Column(String, nullable=False)
     template_file_type = Column(String, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     template_matching_job_templates = relationship(
         "TemplateMatchingJobTemplate",
@@ -32,7 +35,9 @@ class TemplateMatchingJob(Base):
     __tablename__ = "template_matching_jobs"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     job_state = Column(String, nullable=True)
     job_id = Column(String, nullable=True)
 
@@ -47,6 +52,14 @@ class TemplateMatchingJob(Base):
         secondary="template_matching_job_templates",
         uselist=True,
         back_populates="template_matching_jobs",
+    )
+
+    document_template_ids = association_proxy(
+        "template_matching_job_templates",
+        "document_template_id",
+        creator=lambda template_id: TemplateMatchingJobTemplate(
+            document_template_id=template_id
+        ),
     )
 
 

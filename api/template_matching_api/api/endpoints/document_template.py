@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from template_matching_api.api.dependencies import get_session, get_session_maker
 from template_matching_api.api_models.document_template import (
     DocumentTemplateOut,
-    DocumentTemplateIn, DocumentTemplateUpdate,
+    DocumentTemplateIn,
+    DocumentTemplateUpdate,
 )
 from template_matching_api.db import session_scope
 from template_matching_api.db_model import DocumentTemplate
@@ -61,9 +62,13 @@ def create_document_template(
 
 @router.put("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
 def update_document_template(
-        template_id: int, template_update: DocumentTemplateUpdate, session: Session = Depends(get_session)
+    template_id: int,
+    template_update: DocumentTemplateUpdate,
+    session: Session = Depends(get_session),
 ) -> None:
-    template = session.scalar(select(DocumentTemplate).where(DocumentTemplate.id == template_id))
+    template = session.scalar(
+        select(DocumentTemplate).where(DocumentTemplate.id == template_id)
+    )
     if template is None:
         raise HTTPException(status_code=404)
 
@@ -75,8 +80,12 @@ def update_document_template(
 
 
 @router.post("/{template_id}/upload", status_code=status.HTTP_204_NO_CONTENT)
-def upload_document_template(template_id: int, file: UploadFile, session: Session = Depends(get_session)) -> None:
-    template = session.scalar(select(DocumentTemplate).where(DocumentTemplate.id == template_id))
+def upload_document_template(
+    template_id: int, file: UploadFile, session: Session = Depends(get_session)
+) -> None:
+    template = session.scalar(
+        select(DocumentTemplate).where(DocumentTemplate.id == template_id)
+    )
     if template is None:
         raise HTTPException(status_code=404)
 
@@ -87,11 +96,14 @@ def upload_document_template(template_id: int, file: UploadFile, session: Sessio
 
 
 @router.get("/{template_id}/download", status_code=status.HTTP_200_OK)
-def download_document_template(template_id: int, session: Session = Depends(get_session)) -> Response:
+def download_document_template(
+    template_id: int, session: Session = Depends(get_session)
+) -> Response:
     try:
         filename, file_type = session.execute(
-            select(DocumentTemplate.template_filename, DocumentTemplate.template_file_type).where(
-                DocumentTemplate.id == template_id)
+            select(
+                DocumentTemplate.template_filename, DocumentTemplate.template_file_type
+            ).where(DocumentTemplate.id == template_id)
         ).one()
         template_storage = DocumentTemplateStorage()
         file_bytes = template_storage.load(template_id)
@@ -102,10 +114,14 @@ def download_document_template(template_id: int, session: Session = Depends(get_
 
 
 @router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_document_template(template_id: int, session_maker: sessionmaker = Depends(get_session_maker)) -> None:
+def delete_document_template(
+    template_id: int, session_maker: sessionmaker = Depends(get_session_maker)
+) -> None:
     try:
         with session_scope(session_maker) as session:
-            template = session.scalar(select(DocumentTemplate).where(DocumentTemplate.id == template_id))
+            template = session.scalar(
+                select(DocumentTemplate).where(DocumentTemplate.id == template_id)
+            )
             if template is None:
                 raise HTTPException(status_code=404)
 

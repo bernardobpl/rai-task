@@ -6,7 +6,9 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-DB_STORAGE_LOCATION = Path(os.path.realpath(__file__)).parents[1] / "storage/matching_api.db"
+DB_STORAGE_LOCATION = (
+    Path(os.path.realpath(__file__)).parents[1] / "storage/matching_api.db"
+)
 
 
 def get_db():
