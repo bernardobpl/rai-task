@@ -39,6 +39,7 @@ async function loadImageBytes() {
     console.error(e);
   }
 }
+defineExpose({ loadImageBytes });
 </script>
 
 <style scoped></style>

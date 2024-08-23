@@ -7,8 +7,8 @@
           ref="dataTable"
           density="compact"
           :headers="headers"
-          :loading="loadingInProgress"
-          :items="documentTemplates"
+          :loading="loadingTemplates"
+          :items="templates"
           :search="search"
           item-value="id"
           multi-sort
@@ -28,23 +28,26 @@
               <document-template-form
                 :allow-file-upload="true"
                 dialog-title="New Document template"
-                @document-template-saved="fetchDocumentTemplates"
+                @document-template-saved="fetchTemplates"
               />
             </v-toolbar>
           </template>
           <template #item.image="{ item }">
-            <template-image :template-id="item.id" />
+            <template-image
+              :ref="(el) => setTemplateImageRef(el, item.id)"
+              :template-id="item.id"
+            />
           </template>
           <template #item.actions="{ item }">
             <div class="d-inline-block text-no-wrap">
               <template-upload-form
                 :template-id="item.id"
-                @template-updated="fetchDocumentTemplates"
+                @template-updated="() => handleTemplateUpdated(item.id)"
               />
               <document-template-form
                 title="Update Document template"
                 :edited-template="item"
-                @document-template-saved="fetchDocumentTemplates"
+                @document-template-saved="fetchTemplates"
               >
                 <template #activator="{ props }">
                   <v-btn
@@ -71,13 +74,13 @@
 
 <script setup lang="ts">
 import DocumentTemplateForm from '@/components/document-template/DocumentTemplateForm.vue';
-import { type ComponentInstance, onMounted, ref } from 'vue';
-import type { DocumentTemplateOut } from '@/api/resources/DocumentTemplate.ts';
+import { type ComponentInstance, ref } from 'vue';
 import { useApi } from '@/api';
 import { useReportingStore } from '@/stores/Reporting.ts';
 import TemplateImage from '@/components/document-template/TemplateImage.vue';
 import TemplateUploadForm from '@/components/document-template/TemplateUploadForm.vue';
 import type { VDataTable } from 'vuetify/components';
+import { useTemplates } from '@/hooks/useTemplates';
 
 const headers = [
   { title: 'Name', align: 'start', sortable: true, key: 'name' },
@@ -90,22 +93,19 @@ const search = ref('');
 const api = useApi();
 const reportingStore = useReportingStore();
 
-const loadingInProgress = ref(true);
-const documentTemplates = ref<DocumentTemplateOut[]>([]);
+const { templates, loadingTemplates, fetchTemplates } = useTemplates();
 
-const dataTable = ref<ComponentInstance<typeof VDataTable>>();
+const templateImageRefs = ref<
+  Record<string, Element & { loadImageBytes?: () => void }>
+>({});
 
-async function fetchDocumentTemplates() {
-  try {
-    loadingInProgress.value = true;
-    documentTemplates.value = await api.documentTemplate.list();
-  } catch (e) {
-    console.error(e);
-    reportingStore.reportError('Failed to fetch document templates');
-  } finally {
-    loadingInProgress.value = false;
+function setTemplateImageRef(el: Element | null, templateId: number) {
+  if (el) {
+    templateImageRefs.value[`template-image-ref-${templateId}`] = el;
   }
 }
+
+const dataTable = ref<ComponentInstance<typeof VDataTable>>();
 
 async function deleteTemplate(templateId: number) {
   try {
@@ -113,14 +113,19 @@ async function deleteTemplate(templateId: number) {
     if (!confirmed) return;
 
     await api.documentTemplate.delete(templateId);
-    await fetchDocumentTemplates();
+    await fetchTemplates();
   } catch (e) {
     console.error(e);
     reportingStore.reportError('Failed to delete document template');
   }
 }
 
-onMounted(() => {
-  fetchDocumentTemplates();
-});
+function handleTemplateUpdated(templateId: number) {
+  fetchTemplates();
+  const refName = `template-image-ref-${templateId}`;
+  const imgElement = templateImageRefs.value[refName];
+  if (imgElement) {
+    imgElement.loadImageBytes?.();
+  }
+}
 </script>
